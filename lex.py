@@ -8,9 +8,9 @@ from pylint import lint
 operators = {'=': 'Igual op', '+': 'Suma op', '-': 'Resta op', '/': 'Division op', '*': 'Multiplicacion op', '%': 'Modulo op'}
 logics = {'<': 'Menor que', '>': 'Mayor que',  '>=': 'Mayor o igual que',  '<=': 'Menor o igual que', '&&': 'AND', '||': 'OR', '!=': 'Diferente'}
 data_type = {'usE': 'Entero', 'usD': 'Decimal', 'usCh': 'Caracter', 'long': 'largo'}
-punctuation_symbol = {':': '2 Puntos', ';': 'Punto y coma', '.': 'Punto', ',': 'Coma' , '""': 'Comillas', '@': 'Arroba', '$': 'Concatena', '()': 'Parentesis', '{}': 'Llaves', '[]': 'Corchetes' , '<>': 'Encapsula'}
-identifier = {'a': 'caracter', 'b': 'caracter', 'c': 'caracter', 'd': 'caracter'}
-letras = {'a, b, c, d, e, f, g, h' : 'Letras minusculas', 'A...Z' : 'Letras mayusculas'}
+punctuation_symbol = {':': '2 Puntos', ';': 'Punto y coma', '.': 'Punto', ',': 'Coma' , '""': 'Comillas', '@': 'Arroba', '$': 'Concatena', '(': 'Abre parentesis', ')': 'Cierra parentesis', '{': 'Abre Llaves', '}' : 'Cierra llaves', '[': 'Abre corchetes' , ']': 'Cierra corchetes'}
+identifier = {'a': 'caracter', 'b': 'caracter', 'c': 'caracter', 'd': 'caracter', 'e': 'caracter', 'f': 'caracter', 'g': 'caracter', 'h': 'caracter', 'i': 'caracter', 'j': 'caracter', 'k': 'caracter', 'l': 'caracter', 'm': 'caracter', 'n': 'caracter', 'o': 'caracter', 'p': 'caracter', 'q': 'caracter', 'r': 'caracter', 's': 'caracter', 't': 'caracter', 'u': 'caracter', 'v': 'caracter', 'w': 'caracter', 'x': 'caracter', 'y': 'caracter', 'z': 'caracter',
+              'A': 'caracter', 'B': 'caracter', 'C': 'caracter', 'D': 'caracter', 'E': 'caracter', 'F': 'caracter', 'G': 'caracter', 'H': 'caracter', 'I': 'caracter', 'J': 'caracter', 'K': 'caracter', 'L': 'caracter', 'M': 'caracter', 'N': 'caracter', 'O': 'caracter', 'P': 'caracter', 'Q': 'caracter', 'R': 'caracter', 'S': 'caracter', 'T': 'caracter', 'U': 'caracter', 'V': 'caracter', 'W': 'caracter', 'X': 'caracter', 'Y': 'caracter', 'Z': 'caracter'}
 numeros = {'0' : 'Numero','1' : 'Numero','2' : 'Numero','3' : 'Numero','4' : 'Numero','5' : 'Numero','6' : 'Numero','7' : 'Numero','8' : 'Numero','9' : 'Numero'}
 InicioPrograma={'Program' : 'Inicio de Programa'}
 AperturaPrograma = {'++[' : 'Apertura del programa e inicio de zona de variables'}
@@ -21,6 +21,8 @@ CierreCuerpoP= {']-' : 'Cierre del cuerpo del programa'}
 def check_program_structure(content):
     errors = []
     lines = content.split("\n")
+    main_section_started = False
+    main_section_ended = False
 
     # Verificar inicio y fin del programa
     if not lines[0].startswith('Program'):
@@ -43,32 +45,27 @@ def check_program_structure(content):
     if variables_section:  # No se encontró cierre para la sección de variables
         errors.append("No se encontró un cierre para la sección de variables.")
 
-def check_main_section(lines):
-    errors = []
-    main_section_started = False
-    main_section_closed = False
-
+# Verificar la función principal
     for i, line in enumerate(lines):
         # Verificar el inicio de la sección Main
-        if 'Main +[' in line:
+        if 'Main+[' in line:
             if main_section_started:
                 # Error si ya se había iniciado una sección Main
                 errors.append(f"Error: Se encontró una segunda apertura de 'Main' en la línea {i + 1}.")
-            else:
-                main_section_started = True
+            main_section_started = True
         
         # Verificar el cierre de la sección Main
-        elif ']-' in line and main_section_started:
-            main_section_closed = True
-            break  # No se necesitan más verificaciones una vez que Main se cierra
+        elif ']-' in line:
+            if not main_section_started:
+                # Error si la sección Main se cierra sin haber sido abierta
+                errors.append(f"Error: Se encontró un cierre de 'Main' sin una apertura previa en la línea {i + 1}.")
+            else:
+                main_section_ended = True
+                break  # Sale del bucle después de encontrar el cierre de Main
 
     # Verificar si la sección Main fue abierta pero no cerrada
-    if main_section_started and not main_section_closed:
-        errors.append("Error: No se encontró un cierre para la función principal 'Main'.")
-
-    # Verificar si la sección Main fue cerrada pero no abierta
-    if not main_section_started and main_section_closed:
-        errors.append("Error: Se encontró un cierre de 'Main' sin una apertura previa.")
+    if main_section_started and not main_section_ended:
+        errors.append(f"Falta cierre del Main después de la línea {i + 1}.")
 
     return errors
 
@@ -95,7 +92,6 @@ logics_key = logics.keys()
 data_type_key = data_type.keys()
 punctuation_symbol_key = punctuation_symbol.keys()
 identifier_key = identifier.keys()
-letras_key = letras.keys()
 numeros_key = numeros.keys()
 inicio_key = InicioPrograma.keys()
 apertura_key = AperturaPrograma.keys()
@@ -142,8 +138,6 @@ try:
                     print(token, "Simbolo de puntuacion:", punctuation_symbol[token])
                 if token in identifier_key:
                     print(token, "Variable:", identifier[token])
-                if token in letras_key:
-                    print(token, "el dato es:", letras[token])
                 if token in numeros_key:
                     print(token, "el dato es:", numeros[token])
                 if token in inicio_key:
@@ -213,8 +207,6 @@ def analyze_file(file_path):
                         output_text.insert(tk.END, f"{token} Simbolo de puntuacion:  {punctuation_symbol[token]}\n")
                     if token in identifier_key:
                         output_text.insert(tk.END, f"{token} Es un: {identifier[token]}\n")
-                    if token in letras_key:
-                        output_text.insert(tk.END, f"{token} Dato alfabetico: {letras[token]}\n")
                     if token in numeros_key:
                         output_text.insert(tk.END, f"{token} es un: {numeros[token]}\n")
                     if token in inicio_key:

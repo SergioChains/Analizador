@@ -4,9 +4,8 @@ Program
     usE b = 5
 #Un comentario
     Main+[
-        a + b = c
+        a + b = k
+        ( 2 )
 #Hola
     ]-
-    #Termine-.-
 ]--
-°
