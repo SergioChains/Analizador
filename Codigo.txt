@@ -1,0 +1,12 @@
+Program 
+++[
+    usE a = 2
+    usE b = 5
+#Un comentario
+    Main+[
+        a + b = c
+#Hola
+    ]-
+    #Termine-.-
+]--
+°
